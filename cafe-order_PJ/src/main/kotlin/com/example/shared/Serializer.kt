@@ -9,6 +9,8 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+
+// 시간 직렬화 규칙
 @OptIn(ExperimentalSerializationApi::class)
 @Serializer(forClass = LocalDateTime::class)
 class LocalDateTimeSerializer : KSerializer<LocalDateTime> {
