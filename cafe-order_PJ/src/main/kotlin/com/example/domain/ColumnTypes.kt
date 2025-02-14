@@ -1,7 +1,6 @@
 package com.example.domain
 
 
-import com.example.domain.model.CafeMenu
 import com.example.shared.CafeUserRole
 import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.ColumnType
