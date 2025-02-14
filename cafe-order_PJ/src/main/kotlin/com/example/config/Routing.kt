@@ -19,19 +19,15 @@ fun Application.configureRouting() {
 
         route("/api") {
             get("/menus") {
-                val list= menuList
+                val list = menuList
                 // 응답할 때 사용
                 call.respond(list)
-
             }
 
-
-
-
             post("/orders") {
-                val request= call.receive<OrderDto.CreateRequest>()
-                val selectedMenu = menuList.first { it.id==request.menuId }
-                val order=OrderDto.DisplayResponse(
+                val request = call.receive<OrderDto.CreateRequest>()
+                val selectedMenu = menuList.first { it.id == request.menuId }
+                val order = OrderDto.DisplayResponse(
                     orderCode = "diam",
                     menuName = selectedMenu.name,
                     customerName = "Pedro Velez",
@@ -47,7 +43,7 @@ fun Application.configureRouting() {
             get("/orders/{orderCode}") {
                 val orderCode = call.parameters["orderCode"]!!
 
-                val order=OrderDto.DisplayResponse(
+                val order = OrderDto.DisplayResponse(
                     orderCode = orderCode,
                     menuName = "아메리카노",
                     customerName = "Pedro Velez",
@@ -60,9 +56,5 @@ fun Application.configureRouting() {
                 call.respond(order)
             }
         }
-
-
-
-
     }
 }
