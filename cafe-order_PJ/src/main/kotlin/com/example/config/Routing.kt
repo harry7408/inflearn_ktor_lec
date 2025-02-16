@@ -1,16 +1,21 @@
 package com.example.config
 
-import com.example.domain.repository.CafeMenuRepository
+import com.example.service.MenuService
 import com.example.shared.CafeOrderStatus
 import com.example.shared.dto.OrderDto
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import org.koin.ktor.ext.inject
 import java.time.LocalDateTime
 
 
-fun Application.configureRouting(cafeMenuRepository: CafeMenuRepository) {
+fun Application.configureRouting() {
+
+    // Koin 을 활용하여 의존성 주입
+    val cafeMenuService by inject<MenuService>()
+
     routing {
         get("/") {
             call.respondText("Hello World!")
@@ -18,14 +23,14 @@ fun Application.configureRouting(cafeMenuRepository: CafeMenuRepository) {
 
         route("/api") {
             get("/menus") {
-                val list = cafeMenuRepository.findAll()
+                val list = cafeMenuService.findAll()
                 // 응답할 때 사용
                 call.respond(list)
             }
 
             post("/orders") {
                 val request = call.receive<OrderDto.CreateRequest>()
-                val selectedMenu = cafeMenuRepository.read(request.menuId)!!
+                val selectedMenu = cafeMenuService.getMenu(request.menuId)
                 val order = OrderDto.DisplayResponse(
                     orderCode = "diam",
                     menuName = selectedMenu.name,
