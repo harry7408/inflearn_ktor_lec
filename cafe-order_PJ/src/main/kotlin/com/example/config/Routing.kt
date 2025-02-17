@@ -59,6 +59,22 @@ fun Application.configureRouting() {
 
                 call.respond(order)
             }
+
+            get("/me") {
+                // TODO
+            }
+
+            post("/login") {
+                // TODO
+            }
+
+            post("/signup") {
+                // TODO
+            }
+
+            post("/logout") {
+                // TODO
+            }
         }
     }
 }
