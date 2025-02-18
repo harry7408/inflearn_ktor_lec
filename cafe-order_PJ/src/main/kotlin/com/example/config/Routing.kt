@@ -1,5 +1,6 @@
 package com.example.config
 
+import com.example.config.AuthenticatedUser.Companion.CUSTOMER_REQUIRED
 import com.example.service.LoginService
 import com.example.service.MenuService
 import com.example.shared.CafeOrderStatus
@@ -8,6 +9,8 @@ import com.example.shared.dto.OrderDto
 import com.example.shared.dto.UserDto
 import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.http.content.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -24,10 +27,6 @@ fun Application.configureRouting() {
     val loginService by inject<LoginService>()
 
     routing {
-        get("/") {
-            call.respondText("Hello World!")
-        }
-
         route("/api") {
             get("/menus") {
                 val list = cafeMenuService.findAll()
@@ -35,37 +34,41 @@ fun Application.configureRouting() {
                 call.respond(list)
             }
 
-            post("/orders") {
-                val request = call.receive<OrderDto.CreateRequest>()
-                val selectedMenu = cafeMenuService.getMenu(request.menuId)
-                val order = OrderDto.DisplayResponse(
-                    orderCode = "diam",
-                    menuName = selectedMenu.name,
-                    customerName = "Pedro Velez",
-                    price = selectedMenu.price,
-                    status = CafeOrderStatus.READY,
-                    orderedAt = LocalDateTime.now(),
-                    id = 1
-                )
-                call.respond(order)
+            // 주문 생성과 조회는 고객만 가능하도록 인증 작업
+            authenticate(CUSTOMER_REQUIRED) {
+                post("/orders") {
+                    val request = call.receive<OrderDto.CreateRequest>()
+                    val selectedMenu = cafeMenuService.getMenu(request.menuId)
+                    val order = OrderDto.DisplayResponse(
+                        orderCode = "diam",
+                        menuName = selectedMenu.name,
+                        customerName = "Pedro Velez",
+                        price = selectedMenu.price,
+                        status = CafeOrderStatus.READY,
+                        orderedAt = LocalDateTime.now(),
+                        id = 1
+                    )
+                    call.respond(order.orderCode)
+                }
+
+                // Query Parameter 이름을 매칭 시키면 된다
+                get("/orders/{orderCode}") {
+                    val orderCode = call.parameters["orderCode"]!!
+
+                    val order = OrderDto.DisplayResponse(
+                        orderCode = orderCode,
+                        menuName = "아메리카노",
+                        customerName = "Pedro Velez",
+                        price = 1000,
+                        status = CafeOrderStatus.READY,
+                        orderedAt = LocalDateTime.now(),
+                        id = 1
+                    )
+
+                    call.respond(order)
+                }
             }
 
-            // Query Parameter 이름을 매칭 시키면 된다
-            get("/orders/{orderCode}") {
-                val orderCode = call.parameters["orderCode"]!!
-
-                val order = OrderDto.DisplayResponse(
-                    orderCode = orderCode,
-                    menuName = "아메리카노",
-                    customerName = "Pedro Velez",
-                    price = 1000,
-                    status = CafeOrderStatus.READY,
-                    orderedAt = LocalDateTime.now(),
-                    id = 1
-                )
-
-                call.respond(order)
-            }
 
             // 인증된 사용자의 정보 표시 (세션에서 정보를 가져오면 된다)
             get("/me") {
@@ -92,6 +95,11 @@ fun Application.configureRouting() {
                 loginService.logout(call.sessions)
                 call.respond(HttpStatusCode.OK)
             }
+        }
+
+        // React 로 구성된 Web Frontend 실행 (Html 제공 기능)
+        singlePageApplication {
+            react("frontend")
         }
     }
 }

@@ -1,9 +1,6 @@
 package com.example
 
-import com.example.config.configureDatabase
-import com.example.config.configureRouting
-import com.example.config.configureSerialization
-import com.example.config.configureSession
+import com.example.config.*
 import com.example.config.plugin.configureHttp
 import com.example.config.plugin.configureLogging
 import com.example.di.configureDependencyInjection
@@ -18,6 +15,7 @@ fun Application.module() {
     configureDatabase()
     configureSerialization()
     configureSession()
+    configureSecurity()
     configureDependencyInjection()
     configureRouting()
     configureLogging()
