@@ -50,7 +50,7 @@ interface ExposedCrudRepository<TABLE : LongIdTable, DOMAIN : BaseModel> : CrudR
     fun toDomain(row: ResultRow): DOMAIN
     fun updateRow(domain: DOMAIN): TABLE.(UpdateStatement) -> Unit
 
-    private fun <T> dbQuery(block: () -> T): T = transaction {
+    fun <T> dbQuery(block: () -> T): T = transaction {
         addLogger(StdOutSqlLogger)
         block()
     }
