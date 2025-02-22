@@ -11,7 +11,7 @@ import io.ktor.server.response.*
 fun Application.configureSecurity() {
     install(Authentication) {
         session<AuthenticatedUser>(CUSTOMER_REQUIRED) {
-            // Principal? Type 반환
+            // Principal? Type 반환-> Marker Interface
             validate { session ->
                 session.takeIf { it.userRoles.contains(CafeUserRole.CUSTOMER) }
             }

@@ -39,6 +39,7 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:$logback_version")
     implementation("io.ktor:ktor-server-sessions-jvm")
     implementation("io.ktor:ktor-server-auth-jvm")
+    implementation("io.ktor:ktor-server-status-pages-jvm")
 
     // Exposd + h2 + hikaricp
     implementation("org.jetbrains.exposed:exposed-core:$exposed_version")

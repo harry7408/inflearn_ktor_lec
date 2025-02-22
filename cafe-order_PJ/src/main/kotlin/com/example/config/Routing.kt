@@ -98,6 +98,7 @@ fun Application.configureRouting() {
         }
 
         // React 로 구성된 Web Frontend 실행 (Html 제공 기능)
+        // fontend 라는 파일 경로를 찾아 제공
         singlePageApplication {
             react("frontend")
         }

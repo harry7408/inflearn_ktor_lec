@@ -18,5 +18,6 @@ fun Application.module() {
     configureSecurity()
     configureDependencyInjection()
     configureRouting()
+    configureErrorHandling()
     configureLogging()
 }
