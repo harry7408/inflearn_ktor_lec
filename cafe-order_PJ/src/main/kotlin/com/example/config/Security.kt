@@ -23,3 +23,5 @@ fun Application.configureSecurity() {
         }
     }
 }
+// call에 대한 확장함수
+fun ApplicationCall.authenticatedUser() : AuthenticatedUser = authentication.principal<AuthenticatedUser>()!!

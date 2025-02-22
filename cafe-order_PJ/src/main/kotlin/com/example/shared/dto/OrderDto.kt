@@ -21,4 +21,10 @@ class OrderDto {
         val orderedAt: LocalDateTime,
         var id: Long? = null,
     )
+
+    @Serializable
+    // 상태 변경 요청의 RequestBody
+    data class UpdateStatusRequest(
+        val status: CafeOrderStatus
+    )
 }

@@ -7,6 +7,7 @@ import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
 
 // Frontend 측에 401 에러 코드가 정상적으로 전달되지 못한 문제 해결
+// Spring Boot Error Handling 보다 간단해보인다
 fun Application.configureErrorHandling() {
     install(StatusPages) {
         // CafeException 이 발생했을 때 처리해주는 코드 작성
