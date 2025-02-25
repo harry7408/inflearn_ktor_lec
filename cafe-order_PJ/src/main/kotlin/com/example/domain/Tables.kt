@@ -29,8 +29,8 @@ object CafeUserTable : LongIdTable(name = "cafe_user") {
 // 파란색 Italic 글씨체 : Extension Function 을 의미
 object CafeOrderTable : LongIdTable(name = "cafe_order") {
     val orderCode = varchar("order_code", length = 50)
-    val cafeUserId = reference("cafe_user_id", CafeUserTable)
-    val cafeMenuId = reference("cafe_menu_id", CafeMenuTable)
+    val cafeUserId = reference("cafe_user_id", CafeUserTable.id)
+    val cafeMenuId = reference("cafe_menu_id", CafeMenuTable.id)
     val price = integer("price")
     val status = enumerationByName("status", length = 10, CafeOrderStatus::class)
     val orderedAt = datetime("ordered_at")

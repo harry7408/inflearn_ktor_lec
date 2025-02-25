@@ -1,5 +1,6 @@
 package com.example.route
 
+import com.example.config.AuthenticatedUser
 import com.example.config.AuthenticatedUser.Companion.CUSTOMER_REQUIRED
 import com.example.config.authenticatedUser
 import com.example.service.OrderService
@@ -23,10 +24,18 @@ fun Route.orderRoute() {
         post("/orders") {
             val request = call.receive<OrderDto.CreateRequest>()
             val orderCode = orderService.createOrder(request, call.authenticatedUser())
-
             call.respond(orderCode)
         }
 
+        // 주문 관련 상태 변경 API
+        put("/orders/{orderCode}/status") {
+            val orderCode = call.parameters["orderCode"]!!
+            val status = call.receive<OrderDto.UpdateStatusRequest>().status
+            orderService.updateOrderStatus(orderCode, status, call.authenticatedUser())
+            call.respond(HttpStatusCode.OK)
+        }
+    }
+    authenticate(AuthenticatedUser.USER_REQUIRED) {
         // Query Parameter 이름을 매칭 시키면 된다
         get("/orders/{orderCode}") {
             val orderCode = call.parameters["orderCode"]!!
@@ -34,21 +43,12 @@ fun Route.orderRoute() {
 
             call.respond(orders)
         }
-
-
-        // 주문 관련 상태 변경 API
-        put("/orders/{orderCode}/status") {
-            val orderCode = call.parameters["orderCode"]!!
-
-            val status = call.receive<OrderDto.UpdateStatusRequest>().status
-
-            orderService.updateOrderStatus(orderCode, status, call.authenticatedUser())
-
-
-            call.respond(HttpStatusCode.OK)
-        }
-
     }
 
-
+    authenticate(AuthenticatedUser.ADMINISTER_REQUIRED) {
+        get("/orders") {
+            val orders: List<OrderDto.DisplayResponse> = orderService.getOrders()
+            call.respond(orders)
+        }
+    }
 }
