@@ -7,11 +7,12 @@ import com.example.domain.ExposedCrudRepository
 import com.example.domain.model.CafeOrder
 import com.example.shared.dto.OrderDto
 import org.jetbrains.exposed.dao.id.EntityID
-import org.jetbrains.exposed.sql.ResultRow
-import org.jetbrains.exposed.sql.SortOrder
-import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.javatime.JavaLocalDateColumnType
+import org.jetbrains.exposed.sql.javatime.JavaLocalDateTimeColumnType
 import org.jetbrains.exposed.sql.statements.InsertStatement
 import org.jetbrains.exposed.sql.statements.UpdateStatement
+import java.time.LocalDate
 
 class CafeOrderRepository(
     override val table: CafeOrderTable
@@ -56,6 +57,7 @@ class CafeOrderRepository(
             .map(::toDomain)
             .firstOrNull()
     }
+
     /**
      * select o.order_code,
      *        o.price,
@@ -94,5 +96,33 @@ class CafeOrderRepository(
                 id = it[table.id].value
             )
         }
+    }
+
+    /**
+     * query 방식은 DB 연산 부하를 준다 (DATETIME 을 DATE 로 바꾸는 과정)
+     * SELECT cast(ORDERED_AT AS DATE) order_date, count(*), sum(price)
+     * FROM CAFE_ORDER
+     * GROUP BY order_date
+     * ORDER BY order_date DESC;
+     */
+    fun findOrderStats(): List<OrderDto.StatsResponse> = dbQuery {
+        // QUERY
+        val countExpression = table.id.count().alias("count")
+        val priceExpression = table.price.sum().alias("price")
+        val orderDateExpression = table.orderedAt.castTo<LocalDate>(JavaLocalDateColumnType())
+
+        table.select(
+            orderDateExpression,
+            countExpression,
+            priceExpression
+        ).groupBy(orderDateExpression)
+            .orderBy(orderDateExpression to SortOrder.DESC)
+            .map {
+                OrderDto.StatsResponse(
+                    orderDate = it[orderDateExpression],
+                    totalOrderCount = it[countExpression],
+                    totalOrderPrice = it[priceExpression]?.toLong() ?: 0
+                )
+            }
     }
 }

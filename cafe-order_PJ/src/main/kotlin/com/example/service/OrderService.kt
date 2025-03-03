@@ -39,7 +39,7 @@ class OrderService(
     ): OrderDto.DisplayResponse {
         // order Code로 주문조회 -> 주문자와 요청자 검증 -> 주문 데이터 클래스변환, 응답
         val order = getOrderByCode(orderCode)
-        checkOrderOwner(authenticatedUser,order)
+        checkOrderOwner(authenticatedUser, order)
 
         return OrderDto.DisplayResponse(
             orderCode = order.orderCode,
@@ -61,7 +61,7 @@ class OrderService(
         // 주문 조회
         val order: CafeOrder = getOrderByCode(orderCode)
         // 주문자와 요청자가 동일한지 비교
-        checkOrderOwner(authenticatedUser,order)
+        checkOrderOwner(authenticatedUser, order)
 
         // 고객은 취소만 가능하도록 (But 관리자는 고객 + 관리자 2가지 역할을 가지고 있다)
         checkCustomerAction(authenticatedUser, status)
@@ -101,6 +101,24 @@ class OrderService(
 
     fun getOrders(): List<OrderDto.DisplayResponse> {
         return cafeOrderRepository.findAllOrders()
+    }
+
+    fun getOrderStats(): List<OrderDto.StatsResponse> {
+        // DB QUERY 사용 방식
+        return cafeOrderRepository.findOrderStats()
+
+
+       /* // 서버에서 연산하는 방법
+        val orders: List<CafeOrder> = cafeOrderRepository.findAll()
+
+        return orders.groupBy { it.orderedAt.toLocalDate() }
+            .map { (date, list) ->
+                OrderDto.StatsResponse(
+                    orderDate =date,
+                    totalOrderCount = list.count().toLong(),
+                    totalOrderPrice = list.sumOf { it.price }.toLong()
+                )
+            }.sortedByDescending { it.orderDate }*/
     }
 }
 

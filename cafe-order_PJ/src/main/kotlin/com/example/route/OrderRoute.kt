@@ -35,6 +35,7 @@ fun Route.orderRoute() {
             call.respond(HttpStatusCode.OK)
         }
     }
+
     authenticate(AuthenticatedUser.USER_REQUIRED) {
         // Query Parameter 이름을 매칭 시키면 된다
         get("/orders/{orderCode}") {
@@ -45,10 +46,16 @@ fun Route.orderRoute() {
         }
     }
 
+    // 관리자만 허용되는 부분
     authenticate(AuthenticatedUser.ADMINISTER_REQUIRED) {
         get("/orders") {
             val orders: List<OrderDto.DisplayResponse> = orderService.getOrders()
             call.respond(orders)
+        }
+
+        get("/orders/stats") {
+            val stats: List<OrderDto.StatsResponse> = orderService.getOrderStats()
+            call.respond(stats)
         }
     }
 }

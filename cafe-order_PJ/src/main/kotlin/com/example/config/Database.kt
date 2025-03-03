@@ -4,17 +4,20 @@ package com.example.config
 import com.example.domain.CafeMenuTable
 import com.example.domain.CafeOrderTable
 import com.example.domain.CafeUserTable
+import com.example.domain.model.CafeOrder
+import com.example.shared.CafeOrderStatus
 import com.example.shared.dummyMenuQueryList
 import com.example.shared.dummyUserQueryList
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import io.ktor.server.application.*
 import org.h2.tools.Server
-import org.jetbrains.exposed.sql.Database
-import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.StdOutSqlLogger
-import org.jetbrains.exposed.sql.addLogger
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.*
+import kotlin.random.Random
 
 
 fun Application.configureDatabase() {
@@ -66,5 +69,42 @@ private fun initData() {
         execInBatch(dummyUserQueryList)
         // 배치 Insert 작업
         execInBatch(dummyMenuQueryList)
+        batchInsertOrder()
     }
+}
+
+// 랜덤하게 300개의 주문을 만들어내는 작업
+private fun batchInsertOrder(): List<ResultRow> {
+    // 테이블에서 데이터 다 가져오기
+    val menuPairs = CafeMenuTable.selectAll()
+        .toList()
+        .map { it[CafeMenuTable.id].value to it[CafeMenuTable.price] }
+
+    val iterator =
+        (1..300).map { id ->
+            val (menuId, price) = menuPairs.random()
+
+            CafeOrder(
+                orderCode = "OC${UUID.randomUUID()}",
+                cafeMenuId = menuId,
+                cafeUserId = 1L,
+                price = price,
+                status = CafeOrderStatus.READY,
+                orderedAt = LocalDateTime.now().minusDays(Random.nextLong(10))
+
+            )
+        }
+
+    return CafeOrderTable.batchInsert(
+        iterator,
+        shouldReturnGeneratedValues = false,
+        body = {
+            this[CafeOrderTable.orderCode] = it.orderCode
+            this[CafeOrderTable.cafeMenuId] = it.cafeMenuId
+            this[CafeOrderTable.cafeUserId] = it.cafeUserId
+            this[CafeOrderTable.price] = it.price
+            this[CafeOrderTable.status] = it.status
+            this[CafeOrderTable.orderedAt] = it.orderedAt
+        }
+    )
 }
