@@ -1,5 +1,5 @@
 .gradle
-/frontend
+/src/main/resources/frontend
 build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
