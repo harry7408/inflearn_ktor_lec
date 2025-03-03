@@ -5,9 +5,7 @@ import com.example.domain.CafeMenuTable
 import com.example.domain.CafeOrderTable
 import com.example.domain.CafeUserTable
 import com.example.domain.model.CafeOrder
-import com.example.shared.CafeOrderStatus
-import com.example.shared.dummyMenuQueryList
-import com.example.shared.dummyUserQueryList
+import com.example.shared.*
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import io.ktor.server.application.*
@@ -23,7 +21,10 @@ import kotlin.random.Random
 fun Application.configureDatabase() {
     configureH2()
     connectDatabase()
-    initData()
+    // 환경에 따른 db 초기화 설정을 다르게 세팅
+    if (getPropertyBoolean("db.initData", false)) {
+        initData()
+    }
 }
 
 
@@ -43,10 +44,11 @@ fun Application.configureH2() {
 }
 
 // 데이터베이스 설정 (H2 Database)
-private fun connectDatabase() {
+private fun Application.connectDatabase() {
     val config = HikariConfig().apply {
-        jdbcUrl = "jdbc:h2:mem:cafedb"
-        driverClassName = "org.h2.Driver"
+        // Hocon 파일에서 정보 가져오기
+        jdbcUrl = getPropertyString("db.jdbcUrl")
+        driverClassName = getPropertyString("db.driverClassName")
         validate()
     }
 
